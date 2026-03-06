@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDN News - مکمل رپورٹ ڈاؤن لوڈ</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center; color: #333; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #d32f2f; }
+        h2 { color: #d32f2f; margin-bottom: 10px; font-size: 28px; }
+        
+        .controls-row { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; gap: 10px; flex-wrap: wrap; }
+        #search-input { flex-grow: 1; max-width: 300px; padding: 12px; border: 2px solid #ddd; border-radius: 8px; }
+
+        .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; color: white; }
+        .btn-refresh { background-color: #d32f2f; }
+        .btn-pdf { background-color: #2e7d32; }
+        .btn:hover { opacity: 0.8; transform: scale(1.02); }
+
+        .chart-container { margin: 25px 0; padding: 15px; border: 1px solid #eee; }
+        
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
+        th { background-color: #d32f2f; color: white; }
+
+        .news-card-footer { margin-top: 30px; padding: 20px; border-top: 2px solid #eee; text-align: right; background: #f9f9f9; border-radius: 10px; }
+        .highlight { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="report-content" class="container">
+    <h2>📊 SDN News - لائیو ڈیٹا رپورٹ</h2>
+    <p>بمطابق: <span id="current-date"></span></p>
+
+    <div id="status-box" style="font-weight: bold; margin: 10px; color: #d32f2f;">ڈیٹا کنکشن چیک کیا جا رہا ہے...</div>
+
+    <div class="chart-container">
+        <canvas id="myChart" height="100"></canvas>
+    </div>
+
+    <div class="controls-row" data-html2canvas-ignore>
+        <input type="text" id="search-input" placeholder="ڈیٹا تلاش کریں..." onkeyup="filterTable()">
+        <button class="btn btn-refresh" onclick="location.reload()">🔄 ریفریش</button>
+        <button class="btn btn-pdf" onclick="downloadPDF()">📥 PDF ڈاؤن لوڈ کریں</button>
+    </div>
+
+    <div class="table-container">
+        <table id="results-table">
+            <thead><tr id="table-header"></tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+    <div class="news-card-footer">
+        <p><span class="highlight">SDN News:</span> باخبر، ہر لمحہ</p>
+        <p><span class="highlight">Online:</span> www.SDNNews.com</p>
+        <p><span class="highlight">Connect:</span> @SDNNews</p>
+        <p><span class="highlight">Contact:</span> +92 346 0008235</p>
+        <p><span class="highlight">رپورٹ:</span> جمیل احمد کلیال</p>
+    </div>
+</div>
+
+<script>
+const API_KEY = '5rt2GYQdC7Two5P80scW5CSN447zRCl2'; 
+const EXECUTION_ID = '01HKZJ2683PHF9Q9PHHQ8FW4Q1'; 
+document.getElementById('current-date').innerText = new Date().toLocaleString('ur-PK');
+
+async function fetchData() {
+    const options = { headers: { 'X-DUNE-API-KEY': API_KEY } };
+    try {
+        const response = await fetch(`https://api.dune.com/api/v1/execution/${EXECUTION_ID}/results`, options);
+        const data = await response.json();
+        const rows = data.result.rows;
+        const columns = Object.keys(rows[0]);
+
+        // ٹیبل اپ ڈیٹ
+        document.getElementById('table-header').innerHTML = columns.map(c => `<th>${c.toUpperCase()}</th>`).join('');
+        document.getElementById('table-body').innerHTML = rows.map(r => `<tr>${columns.map(c => `<td>${r[c]}</td>`).join('')}</tr>`).join('');
+        document.getElementById('status-box').innerHTML = "✅ رپورٹ مکمل طور پر اپ ڈیٹ ہے";
+
+        // گراف اپ ڈیٹ
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: rows.map(r => r[columns[0]]),
+                datasets: [{ label: 'ڈیٹا ٹرینڈ', data: rows.map(r => r[columns[1]]), borderColor: '#d32f2f', fill: false }]
+            }
+        });
+    } catch (e) { document.getElementById('status-box').innerText = "خرابی: ڈیٹا لوڈ نہیں ہو سکا۔"; }
+}
+
+function downloadPDF() {
+    const element = document.getElementById('report-content');
+    const opt = {
+        margin: 0.5,
+        filename: 'SDN_News_Report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+
+function filterTable() {
+    let input = document.getElementById("search-input").value.toLowerCase();
+    let rows = document.getElementById("table-body").getElementsByTagName("tr");
+    for (let row of rows) row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+}
+
+fetchData();
+</script>
+
+</body>
+</html>
