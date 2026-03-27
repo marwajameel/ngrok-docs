@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDN News - Connect Wallet</title>
+    
+    <script src="https://unpkg.com/@coinbase/wallet-sdk@3.7.2/dist/index.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'system-ui', sans-serif; background-color: #f3f4f6; }
+        .btn-base { background-color: #0052ff; color: white; transition: 0.3s; }
+        .btn-base:hover { background-color: #003db3; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-4 text-gray-800">SDN News ڈیجیٹل پورٹل</h1>
+        <p class="text-gray-600 mb-6">اپنے اسمارٹ والٹ (Base) کے ذریعے لاگ ان کریں</p>
+
+        <button id="connectBtn" class="btn-base px-6 py-3 rounded-full font-semibold text-lg w-full flex items-center justify-center gap-2">
+            <span>والٹ سے جڑیں (Connect)</span>
+        </button>
+
+        <div id="accountInfo" class="mt-6 hidden">
+            <p class="text-green-600 font-medium">کامیابی سے جڑ گیا!</p>
+            <p id="walletAddress" class="text-xs text-gray-500 mt-2 break-all bg-gray-100 p-2 rounded"></p>
+        </div>
+    </div>
+
+    <script>
+        // ترتیب (Configuration)
+        const APP_NAME = 'SDN News';
+        const APP_LOGO_URL = 'https://marwajameel.github.io/sdn-news/logo.png'; // اپنا اصل لوگو لنک یہاں ڈالیں
+        const DEFAULT_ETH_JSONRPC_URL = 'https://mainnet.base.org';
+        const CHAIN_ID = 8453; // Base Mainnet ID
+
+        // والٹ ایس ڈی کے (SDK) شروع کریں
+        const coinbaseWalletFD = new CoinbaseWalletSDK({
+            appName: APP_NAME,
+            appLogoUrl: APP_LOGO_URL,
+            darkMode: false
+        });
+
+        const ethereum = coinbaseWalletFD.makeWeb3Provider(DEFAULT_ETH_JSONRPC_URL, CHAIN_ID);
+
+        const connectBtn = document.getElementById('connectBtn');
+        const accountInfo = document.getElementById('accountInfo');
+        const walletAddress = document.getElementById('walletAddress');
+
+        // بٹن پر کلک کرنے کا فنکشن
+        connectBtn.addEventListener('click', async () => {
+            try {
+                // اکاؤنٹ کی درخواست کریں
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                
+                if (accounts.length > 0) {
+                    const address = accounts[0];
+                    walletAddress.innerText = `آپ کا ایڈریس: ${address}`;
+                    accountInfo.classList.remove('hidden');
+                    connectBtn.innerText = 'والٹ جڑا ہوا ہے';
+                    connectBtn.disabled = true;
+                    
+                    console.log("Connected to SDN News:", address);
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+                alert("والٹ سے جڑنے میں مسئلہ ہوا ہے۔ دوبارہ کوشش کریں۔");
+            }
+        });
+    </script>
+</body>
+</html>
