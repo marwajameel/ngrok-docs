@@ -94,9 +94,10 @@
                 const txHash = await ethereum.request({ method: 'eth_sendTransaction', params });
                 alert("شکریہ! ٹرانزیکشن مکمل ہوگئی۔ Hash: " + txHash);
             } catch (err) {
-                console.error(err);
-                alert("ٹرانزیکشن کینسل یا ناکام ہوگئی۔");
-            }
+                console.error(err)
+alert("ٹرانزیکشن کینسل یا ناکام ہوگئی۔");
+
+            
         });
     </script>
 </body>
