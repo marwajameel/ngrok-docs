@@ -3,72 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDN News - Connect Wallet</title>
+    <title>SDN News - Base Smart Wallet</title>
     
     <script src="https://unpkg.com/@coinbase/wallet-sdk@3.7.2/dist/index.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body { font-family: 'system-ui', sans-serif; background-color: #f3f4f6; }
-        .btn-base { background-color: #0052ff; color: white; transition: 0.3s; }
-        .btn-base:hover { background-color: #003db3; }
+        body { font-family: 'system-ui', sans-serif; background: #f0f2f5; }
+        .base-card { background: white; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
+        .btn-connect { background: #0052ff; color: white; transition: 0.4s; }
+        .btn-connect:hover { background: #003db3; transform: scale(1.02); }
+        .btn-tip { background: #10b981; color: white; transition: 0.4s; }
+        .btn-tip:hover { background: #059669; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">SDN News ڈیجیٹل پورٹل</h1>
-        <p class="text-gray-600 mb-6">اپنے اسمارٹ والٹ (Base) کے ذریعے لاگ ان کریں</p>
+    <div class="base-card p-8 text-center max-w-sm w-full">
+        <div class="mb-4">
+            <div class="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-2 shadow-lg">SDN</div>
+            <h2 class="text-2xl font-bold text-gray-800">SDN News</h2>
+            <p class="text-xs text-blue-500 font-semibold tracking-wide uppercase">Official Portal</p>
+        </div>
 
-        <button id="connectBtn" class="btn-base px-6 py-3 rounded-full font-semibold text-lg w-full flex items-center justify-center gap-2">
-            <span>والٹ سے جڑیں (Connect)</span>
+        <button id="connectBtn" class="btn-connect w-full py-4 rounded-2xl font-bold text-lg shadow-md mb-4">
+            والٹ سے جڑیں
         </button>
 
-        <div id="accountInfo" class="mt-6 hidden">
-            <p class="text-green-600 font-medium">کامیابی سے جڑ گیا!</p>
-            <p id="walletAddress" class="text-xs text-gray-500 mt-2 break-all bg-gray-100 p-2 rounded"></p>
+        <div id="accountArea" class="mt-6 hidden border-t pt-6">
+            <div class="bg-gray-50 p-4 rounded-xl mb-4 text-right">
+                <p class="text-[10px] text-gray-400 font-bold mb-1">آپ کا والٹ ایڈریس:</p>
+                <p id="walletAddress" class="text-[9px] text-gray-600 break-all font-mono bg-white p-2 border rounded"></p>
+            </div>
+
+            <p class="text-xs text-gray-500 mb-3 text-right">ایڈمن کو سپورٹ کریں:</p>
+            <button id="tipBtn" class="btn-tip w-full py-3 rounded-xl font-bold shadow-md flex items-center justify-center gap-2">
+                <span>0.0001 ETH ٹپ بھیجیں</span>
+                <span class="text-[10px] opacity-80">(Base Network)</span>
+            </button>
+            <p class="text-[10px] text-gray-400 mt-2">To: jamilahmed.base.eth</p>
         </div>
     </div>
 
     <script>
         // ترتیب (Configuration)
         const APP_NAME = 'SDN News';
-        const APP_LOGO_URL = 'https://marwajameel.github.io/sdn-news/logo.png'; // اپنا اصل لوگو لنک یہاں ڈالیں
-        const DEFAULT_ETH_JSONRPC_URL = 'https://mainnet.base.org';
-        const CHAIN_ID = 8453; // Base Mainnet ID
+        const APP_LOGO = 'https://marwajameel.github.io/sdn-news/logo.png'; 
+        const MY_WALLET = 'jamilahmed.base.eth'; // آپ کا بیس نیم یہاں سیٹ کر دیا گیا ہے
 
-        // والٹ ایس ڈی کے (SDK) شروع کریں
-        const coinbaseWalletFD = new CoinbaseWalletSDK({
+        const coinbaseWallet = new CoinbaseWalletSDK({
             appName: APP_NAME,
-            appLogoUrl: APP_LOGO_URL,
+            appLogoUrl: APP_LOGO,
             darkMode: false
         });
 
-        const ethereum = coinbaseWalletFD.makeWeb3Provider(DEFAULT_ETH_JSONRPC_URL, CHAIN_ID);
+        const ethereum = coinbaseWallet.makeWeb3Provider('https://mainnet.base.org', 8453);
 
         const connectBtn = document.getElementById('connectBtn');
-        const accountInfo = document.getElementById('accountInfo');
+        const accountArea = document.getElementById('accountArea');
         const walletAddress = document.getElementById('walletAddress');
+        const tipBtn = document.getElementById('tipBtn');
 
-        // بٹن پر کلک کرنے کا فنکشن
+        // کنیکٹ کرنے کا فنکشن
         connectBtn.addEventListener('click', async () => {
             try {
-                // اکاؤنٹ کی درخواست کریں
                 const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                
                 if (accounts.length > 0) {
-                    const address = accounts[0];
-                    walletAddress.innerText = `آپ کا ایڈریس: ${address}`;
-                    accountInfo.classList.remove('hidden');
-                    connectBtn.innerText = 'والٹ جڑا ہوا ہے';
+                    walletAddress.innerText = accounts[0];
+                    accountArea.classList.remove('hidden');
+                    connectBtn.innerText = "کامیابی سے جڑ گیا ✅";
+                    connectBtn.classList.replace('btn-connect', 'bg-gray-100');
+                    connectBtn.classList.add('text-gray-400');
                     connectBtn.disabled = true;
-                    
-                    console.log("Connected to SDN News:", address);
                 }
             } catch (error) {
-                console.error("Connection Error:", error)
-       alert("والٹ سے جڑنے میں مسئلہ ہوا ہے۔ دوبارہ کوشش کریں۔");
+                console.error("Error:", error);
+                alert("والٹ سے جڑنے میں مسئلہ ہوا۔ دوبارہ کوشش کریں۔");
+            }
+        });
 
+        // ٹرانزیکشن کا فنکشن
+        tipBtn.addEventListener('click', async () => {
+            const params = [{
+                from: walletAddress.innerText,
+                to: MY_WALLET,
+                value: '0x5AF3107A4000', // 0.0001 ETH
+            }];
+
+            try {
+                const txHash = await ethereum.request({ method: 'eth_sendTransaction', params });
+                alert("شکریہ! ٹرانزیکشن مکمل ہوگئی۔ Hash: " + txHash);
+            } catch (err) {
+                console.error(err);
+                alert("ٹرانزیکشن کینسل یا ناکام ہوگئی۔");
+            }
         });
     </script>
 </body>
