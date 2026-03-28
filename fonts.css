@@ -1,0 +1,14 @@
+/* اردو فونٹ کو سسٹم سے جوڑنے کا کوڈ */
+@font-face {
+    font-family: 'Jameel Noori Nastaleeq';
+    src: url('/fonts/Jameel-Noori-Nastaleeq.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* پوری ایپ پر اردو فونٹ لاگو کرنے کے لیے */
+.urdu-text {
+    font-family: 'Jameel Noori Nastaleeq', serif;
+    direction: rtl; /* تحریر دائیں سے بائیں کرنے کے لیے */
+    line-height: 1.8; /* نستعلیق کے لیے لائن کی جگہ زیادہ ہونی چاہیے */
+}
